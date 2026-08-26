@@ -1,0 +1,15 @@
+import random
+
+# 1. 建立打掃人員與打掃區域的列表
+soldiers = [ "元泰", "志豪", "家豪", "冠宇" ]
+areas = [ "中山室", "器材室", "連部廁所", "走廊" ]
+
+# 2. 將人員名單隨機打亂（就像洗牌一樣）
+random.shuffle(soldiers)
+
+print("--- 營區打掃分配結果 ---")
+
+# 3. 用迴圈把打掃人員跟區域依序配對
+# zip() 可以把兩個列表黏在一起同時讀取
+for soldier, area in zip(soldiers, areas):
+    print(soldier + "負責打掃： " + area)
