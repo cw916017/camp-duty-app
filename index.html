@@ -129,12 +129,13 @@
 <body>
 
     <div class="container">
-        <h1>🪖 營區每日排哨與打掃分配</h1>
+        <h1>🪖 營區排哨與打掃分配</h1>
 
         <!-- 每日排哨設定區塊 -->
         <div class="section-box">
             <h3>🛡️ 每日固定崗位排班表</h3>
-            <p style="font-size: 12px; color: #666; margin-top: 0;">請為各個時段與職務選定對應的人員：</p>
+            <p style="font-size: 12px; color: #666; margin-top: 0;">提示：凡是被指派到以下任何哨位的人員，系統將<strong>自動免除</strong>其當天的打掃勤務！
+            </p>
 
             <table class="duty-table" id="guard-table">
                 <thead>
@@ -156,7 +157,7 @@
                         <td><strong>24 - 02</strong></td>
                         <td><select class="guard-select" data-post="安官 24-02"></select></td>
                         <td><select class="guard-select" data-post="哨長 24-02"></select></td>
-                        <td rowspan="4" style="background: #f1f5f9; color: #94a3b8; font-size: 12px;">（巡查通常為固定或免兼）</td>
+                        <td rowspan="4" style="background: #f1f5f9; color: #94a3b8; font-size: 12px;">（巡查免兼其他）</td>
                     </tr>
                     <tr>
                         <td><strong>02 - 04</strong></td>
@@ -207,18 +208,17 @@
     </div>
 
     <script>
-        // 完整的資料庫人員名單（共 28 人）
+        // 完整 28 人名單資料庫
         const allSoldiers = [
             "吳元泰", "盧藉汶", "吳炳憲", "廖春祿", "彭詠然", "曹哲溥", "林進宏", "歐家榮",
             "石偉莖", "蘇俊憲", "許乃靑", "許文豪", "陳祖祥", "吳鴻祥", "廖祐笙", "張富員",
             "張釗仁", "彭俊翔", "曾家慶", "李建祥", "林于聖", "林奕瑋", "林庭安", "林志論",
             "歐宸宇", "王廷瑋", "田啟倫", "葉政榮", "葉重達", "蔡佳宏", "蔡士順", "蔡英政",
             "蔡貴元", "薛仲恩", "蘇小龍", "許哲銘", "許皓喧", "許雅登", "邵昱晟", "顏郁凱",
-            "魏子玹", "黃昱豪" // （包含你名單裡所有的全名資料庫）
-        ]; // 為了確保彈性，這裡直接收入完整名單
+            "魏子玹", "黃昱豪"
+        ];
 
-        // 早上與下午打掃任務與所需人數
-        const morningDuties = { "升旗": 3, "冰桶": 3 }; // 共 6 人
+        const morningDuties = { "升旗": 3, "冰桶": 3 }; // 需 6 人
         const afternoonDuties = {
             "下寢浴廁含洗手台": 4,
             "上寢浴廁含洗手台": 4,
@@ -226,9 +226,8 @@
             "上寢垃圾": 3,
             "冰桶、降旗": 3,
             "下寢寢室收餐勤": 5
-        }; // 共 22 人 (總共需要 28 扣除哨兵人數)
+        }; // 需 22 人 (總計打掃需 28 人)
 
-        // 初始化下拉選單
         function initDropdowns() {
             const selects = document.querySelectorAll('.guard-select');
             selects.forEach(select => {
@@ -240,7 +239,6 @@
             });
         }
 
-        // 洗牌演算法
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -255,45 +253,48 @@
             const warningMsg = document.getElementById("warning-msg");
             warningMsg.innerText = "";
 
-            // 1. 收集所有已被選去排哨的人
+            // 1. 收集所有已被選去排哨的人（自動濾空值）
             const guardSelects = document.querySelectorAll('.guard-select');
             let assignedGuards = [];
             let guardDetails = {};
 
-            guardSelects.forEach(select => {
+            for (let select of guardSelects) {
                 let postName = select.getAttribute('data-post');
                 let person = select.value;
                 if (person) {
                     if (assignedGuards.includes(person)) {
-                        warningMsg.innerText = `⚠️ 警告：人員 "${person}" 被重複指派到多個哨位！`;
+                        warningMsg.innerText = `⚠️ 警告：人員 "${person}" 被重複指派到多個崗位！`;
                         return;
                     }
                     assignedGuards.push(person);
                     guardDetails[postName] = person;
                 }
-            });
-
-            // 2. 計算剩餘可用於打掃的人員
-            let remainingSoldiers = allSoldiers.filter(name => !assignedGuards.includes(name));
-
-            // 總共打掃需要的人數 (6 + 22 = 28人)
-            const totalCleaningNeeded = 6 + 22;
-
-            if (remainingSoldiers.length < totalCleaningNeeded) {
-                warningMsg.innerText = `⚠️ 警告：排哨人數過多，剩餘可打掃人數不足 ${totalCleaningNeeded} 人！(目前剩餘 ${remainingSoldiers.length} 人)`;
-                document.getElementById("results").innerHTML = "";
-                return;
             }
 
-            // 3. 隨機洗牌剩餘打掃人員
+            // 2. 從總名單中剔除所有排哨人員，剩下的人才進入打掃抽籤池
+            let remainingSoldiers = allSoldiers.filter(name => !assignedGuards.includes(name));
+
+            const totalCleaningNeeded = 6 + 22; // 28個打掃名額
+
+            // 檢查剩餘可打掃的人數是否足夠
+            if (remainingSoldiers.length < totalCleaningNeeded) {
+                let missingCount = totalCleaningNeeded - remainingSoldiers.length;
+                warningMsg.innerText = `⚠️ 注意：目前排了 ${assignedGuards.length} 人站哨，導致打掃人數少 ${missingCount} 人（剩餘 ${remainingSoldiers.length} 人，打掃共需 ${totalCleaningNeeded} 人）。請確認編組或調整。`;
+            }
+
+            // 3. 隨機洗牌剩餘的打掃人員
             shuffle(remainingSoldiers);
 
             let resultsHTML = `<h2>📋 今日總體任務分派結果</h2>`;
 
-            // 顯示排哨結果摘要
-            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派</h3><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; font-size: 14px;">`;
-            for (const [post, person] of Object.entries(guardDetails)) {
-                resultsHTML += `<div>• <strong>${post}</strong>：${person}</div>`;
+            // 顯示固定哨位結果
+            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派 (免打掃)</h3><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; font-size: 14px;">`;
+            if (Object.keys(guardDetails).length === 0) {
+                resultsHTML += `<div style="color: #7f8c8d;">（目前尚未選擇任何排哨人員）</div>`;
+            } else {
+                for (const [post, person] of Object.entries(guardDetails)) {
+                    resultsHTML += `<div>• <strong>${post}</strong>：${person}</div>`;
+                }
             }
             resultsHTML += `</div></div>`;
 
@@ -302,35 +303,40 @@
             // 顯示早上打掃任務
             resultsHTML += `<h2>☀️ 早上打掃任務</h2>`;
             for (const [area, count] of Object.entries(morningDuties)) {
-                let endIndex = startIndex + count;
-                let assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
+                let assignedGroup = [];
+                if (startIndex < remainingSoldiers.length) {
+                    let endIndex = Math.min(startIndex + count, remainingSoldiers.length);
+                    assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
+                    startIndex = endIndex;
+                }
                 resultsHTML += `
                 <div class="result-card">
                     <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
-                    <p>${assignedGroup.join('、')}</p>
+                    <p>${assignedGroup.length > 0 ? assignedGroup.join('、') : '<span style="color:e74c3c;">人數不足，未分配</span>'}</p>
                 </div>
             `;
-                startIndex = endIndex;
             }
 
             // 顯示下午打掃任務
             resultsHTML += `<h2>🌤️ 下午打掃任務</h2>`;
             for (const [area, count] of Object.entries(afternoonDuties)) {
-                let endIndex = startIndex + count;
-                let assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
+                let assignedGroup = [];
+                if (startIndex < remainingSoldiers.length) {
+                    let endIndex = Math.min(startIndex + count, remainingSoldiers.length);
+                    assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
+                    startIndex = endIndex;
+                }
                 resultsHTML += `
                 <div class="result-card">
                     <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
-                    <p>${assignedGroup.join('、')}</p>
+                    <p>${assignedGroup.length > 0 ? assignedGroup.join('、') : '<span style="color:#e74c3c;">人數不足，未分配</span>'}</p>
                 </div>
             `;
-                startIndex = endIndex;
             }
 
             document.getElementById("results").innerHTML = resultsHTML;
         }
 
-        // 網頁載入時初始化選單
         window.onload = initDropdowns;
     </script>
 
