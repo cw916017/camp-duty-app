@@ -211,8 +211,8 @@
     </div>
 
     <script>
-        // 完整 42 人名單資料庫（對應你截圖中的所有群組成員）
-        const allSoldiers = [
+        // 完整人員總名單（自動整合新加入的人員，避免重複）
+        const baseSoldiers = [
             "吳元泰", "盧精汶", "吳炳憲", "廖春祿", "彭詠然", "曹哲溥", "林進宏", "歐家榮",
             "石偉荃", "蘇俊憲", "許乃靑", "許文豪", "陳祖祥", "吳鴻祥", "廖祐笙", "張富員",
             "張釗仁", "彭俊翔", "曾家慶", "李建祥", "林于聖", "林奕瑋", "林庭安", "林志諭",
@@ -221,20 +221,28 @@
             "魏子玹", "黃昱豪"
         ];
 
+        const extraAnSoldiers = ["方喬毅", "許宗憲", "許家銘", "施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
+
+        // 總名單 = 基礎名單 + 額外安官名單中還沒被涵蓋的人
+        const allSoldiers = Array.from(new Set([...baseSoldiers, ...extraAnSoldiers]));
+
         // 1. 巡查名單
         const patrolList = ["余星宗", "林隆宏", "許書銘", "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
 
-        // 2. 安官名單：全部人扣除巡查的人
-        const anList = allSoldiers.filter(name => !patrolList.includes(name));
+        // 2. 安官名單：基礎安官條件（全部人扣除巡查）加上你指定的額外安官人員
+        const baseAnList = allSoldiers.filter(name => !patrolList.includes(name));
+        const anList = Array.from(new Set([...baseAnList, ...extraAnSoldiers]));
 
-        // 3. 哨長排除的名單：巡查的人 + 指定的另外 10 人
+        // 3. 哨長排除的名單：巡查的人 + 原本排除的 10 人
         const additionalExcludeForCommander = [
             "林進宏", "石偉荃", "許乃靑", "陳祖祥", "張富員", "林于聖", "林奕瑋", "田啟倫", "葉政榮", "吳元泰"
         ];
         const commanderExclude = [...patrolList, ...additionalExcludeForCommander];
 
-        // 4. 哨長名單：全部人扣除上述所有排除的人
-        const commanderList = allSoldiers.filter(name => !commanderExclude.includes(name));
+        // 4. 哨長名單：先由全部人扣除排除名單，再「加上」你指定新增的哨長名單
+        const baseCommanderList = allSoldiers.filter(name => !commanderExclude.includes(name));
+        const extraCommanderSoldiers = ["施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
+        const commanderList = Array.from(new Set([...baseCommanderList, ...extraCommanderSoldiers]));
 
         const morningDuties = { "升旗": 3, "冰桶": 3 }; // 需 6 人
         const afternoonDuties = {
