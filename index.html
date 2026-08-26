@@ -284,10 +284,24 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>輕戰 (1.75噸)</strong></td>
+                            <td><strong>1.75噸</strong></td>
+                            <td><select class="guard-select" data-type="all" data-post="1.75噸 駕駛"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="all" data-post="1.75噸 車長"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                        </tr>
+                        <tr>
+                            <td><strong>輕戰</strong></td>
                             <td><select class="guard-select" data-type="all" data-post="輕戰 駕駛"
                                     onchange="updateGuardDropdowns()"></select></td>
                             <td><select class="guard-select" data-type="all" data-post="輕戰 車長"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                        </tr>
+                        <tr>
+                            <td><strong>3.5噸中戰</strong></td>
+                            <td><select class="guard-select" data-type="all" data-post="3.5噸中戰 駕駛"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="all" data-post="3.5噸中戰 車長"
                                     onchange="updateGuardDropdowns()"></select></td>
                         </tr>
                         <tr>
@@ -348,7 +362,9 @@
         ];
         const commanderExclude = [...patrolList, ...additionalExcludeForCommander];
         const baseCommanderList = allSoldiers.filter(name => !commanderExclude.includes(name));
-        const extraCommanderSoldiers = ["施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
+
+        // 加入指定的林隆宏、余星宗、許書銘至車長/哨長名單
+        const extraCommanderSoldiers = ["施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威", "林隆宏", "余星宗", "許書銘"];
         const commanderList = Array.from(new Set([...baseCommanderList, ...extraCommanderSoldiers]));
 
         const morningDuties = { "升旗": 3, "冰桶": 3 };
