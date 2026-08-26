@@ -41,7 +41,7 @@
             padding-bottom: 5px;
         }
 
-        /* 分頁標籤樣式 */
+        /* 分頁按鈕 */
         .tab-buttons {
             display: flex;
             justify-content: center;
@@ -84,7 +84,7 @@
             margin-bottom: 15px;
         }
 
-        /* 排哨表格樣式 */
+        /* 表格樣式 */
         table.duty-table {
             width: 100%;
             border-collapse: collapse;
@@ -131,6 +131,14 @@
             background-color: #2980b9;
         }
 
+        button.pdf-btn {
+            background-color: #27ae60;
+        }
+
+        button.pdf-btn:hover {
+            background-color: #219653;
+        }
+
         .result-card {
             background: #fdfefe;
             border: 1px solid #e2e8f0;
@@ -159,47 +167,32 @@
             margin-top: 10px;
         }
 
-        /* 第二頁點名清單樣式 */
-        .checklist-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
+        /* PDF 列印專用樣式覆蓋 */
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
 
-        .checkbox-card {
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            padding: 10px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 15px;
-        }
+            .tab-buttons,
+            .action-btn,
+            .section-box:not(#pdf-export-area),
+            select {
+                display: none !important;
+            }
 
-        .checkbox-card label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            width: 100%;
-        }
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+                padding: 0;
+            }
 
-        .checkbox-card input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .exempt-tag {
-            font-size: 11px;
-            color: #e74c3c;
-            background: #fadbd8;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
+            #pdf-export-area {
+                display: block !important;
+                border: none;
+                background: #fff;
+                padding: 0;
+            }
         }
     </style>
 </head>
@@ -211,16 +204,15 @@
 
         <!-- 分頁按鈕 -->
         <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchPage(1)">第一頁：排哨與打掃指派</button>
-            <button class="tab-btn" onclick="switchPage(2)" onclick-action="initChecklist()">第二頁：今日打掃點名清單</button>
+            <button class="tab-btn active" onclick="switchPage(1)">第一頁：固定哨與任務排班</button>
+            <button class="tab-btn" onclick="switchPage(2)">第二頁：亂數打掃抽籤分派</button>
         </div>
 
         <!-- ================= PAGE 1 ================= -->
         <div id="page-1" class="page-section active">
-            <div class="section-box">
+            <div class="section-box" id="pdf-export-area">
                 <h3>🛡️ 每日固定崗位排班表 (22 - 08)</h3>
-                <p style="font-size: 12px; color: #666; margin-top: 0;">
-                    提示：凡是被指派到以下任何哨位或車輛任務的人員，系統將<strong>自動免除</strong>其當天的打掃勤務！</p>
+                <p style="font-size: 12px; color: #666; margin-top: 0;">提示：在此頁排定哨位後，點擊下方按鈕即可產生正式排班與打掃檢視畫面以列印或轉存 PDF。</p>
 
                 <table class="duty-table" id="guard-table">
                     <thead>
@@ -299,7 +291,8 @@
                 </table>
             </div>
 
-            <button class="action-btn" onclick="generateAllDuties()">🎲 自動排哨並隨機分配剩餘打掃任務</button>
+            <button class="action-btn" onclick="previewDuties()">🔍 預覽排班與自動打掃分配結果</button>
+            <button class="action-btn pdf-btn" onclick="exportToPDF()">📄 產生 PDF / 列印正式表單</button>
 
             <div id="warning-msg" class="warning"></div>
             <div id="results"></div>
@@ -308,15 +301,15 @@
         <!-- ================= PAGE 2 ================= -->
         <div id="page-2" class="page-section">
             <div class="section-box">
-                <h3>🧹 今日打掃人員點名勾選清單</h3>
-                <p style="font-size: 13px; color: #666;">這裡列出了指定的 26 位打掃人員。若有人員在第一頁被排到哨位，將會自動標示並略過。</p>
-                <div id="checklist-container" class="checklist-grid"></div>
+                <h3>🎲 每日打掃人員隨機抽籤系統</h3>
+                <p style="font-size: 13px; color: #666;">系統會自動抓取 26 位指定打掃人員，並自動排除在第一頁被排到哨位的人員，隨機分派打掃區域！</p>
+                <button class="action-btn" onclick="generateRandomCleaning()">🎰 開始亂數抽籤分配打掃</button>
             </div>
+            <div id="cleaning-results"></div>
         </div>
     </div>
 
     <script>
-        // 完整人員總名單
         const baseSoldiers = [
             "吳元泰", "盧精汶", "吳炳憲", "廖春祿", "彭詠然", "曹哲溥", "林進宏", "歐家榮",
             "石偉荃", "蘇俊憲", "許乃靑", "許文豪", "陳祖祥", "吳鴻祥", "廖祐笙", "張富員",
@@ -329,7 +322,7 @@
         const extraAnSoldiers = ["方喬毅", "許宗憲", "許家銘", "施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
         const allSoldiers = Array.from(new Set([...baseSoldiers, ...extraAnSoldiers]));
 
-        // 你指定的 26 位今日打掃人員名單
+        // 指定的 26 位打掃人員名單
         const targetCleaningSoldiers = [
             "吳元泰", "彭詠然", "曹哲溥", "吳鴻祥", "廖祐笙", "張釗仁", "彭俊翔", "曾家慶",
             "李建祥", "林庭安", "林志諭", "歐宸宇", "田啟倫", "葉重達", "蔡佳宏", "蔡士頎",
@@ -337,14 +330,10 @@
             "顏郁凱", "魏子玹", "黃昱豪"
         ];
 
-        // 1. 巡查名單
         const patrolList = ["余星宗", "林隆宏", "許書銘", "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
-
-        // 2. 安官名單
         const baseAnList = allSoldiers.filter(name => !patrolList.includes(name));
         const anList = Array.from(new Set([...baseAnList, ...extraAnSoldiers]));
 
-        // 3. 哨長排除與名單
         const additionalExcludeForCommander = [
             "林進宏", "石偉荃", "許乃靑", "陳祖祥", "張富員", "林于聖", "林奕瑋", "田啟倫", "葉政榮", "吳元泰"
         ];
@@ -381,20 +370,14 @@
             });
         }
 
-        // 分頁切換功能
         function switchPage(pageNum) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
 
             document.querySelectorAll('.tab-btn')[pageNum - 1].classList.add('active');
             document.getElementById(`page-${pageNum}`).classList.add('active');
-
-            if (pageNum === 2) {
-                initChecklist();
-            }
         }
 
-        // 取得目前被選去排哨的所有人員名單
         function getAssignedGuards() {
             const guardSelects = document.querySelectorAll('.guard-select');
             let assigned = [];
@@ -402,27 +385,6 @@
                 if (select.value) assigned.push(select.value);
             });
             return assigned;
-        }
-
-        // 初始化第二頁的勾選清單
-        function initChecklist() {
-            const container = document.getElementById('checklist-container');
-            const assignedGuards = getAssignedGuards();
-            let html = '';
-
-            targetCleaningSoldiers.forEach((name, index) => {
-                let isExempt = assignedGuards.includes(name);
-                html += `
-                <div class="checkbox-card" style="${isExempt ? 'background:#f1f5f9; opacity:0.7;' : ''}">
-                    <label>
-                        <input type="checkbox" ${isExempt ? 'disabled' : ''}>
-                        <span>${index + 1}. ${name}</span>
-                    </label>
-                    ${isExempt ? '<span class="exempt-tag">已排哨免打掃</span>' : ''}
-                </div>
-            `;
-            });
-            container.innerHTML = html;
         }
 
         function shuffle(array) {
@@ -435,7 +397,7 @@
             return array;
         }
 
-        function generateAllDuties() {
+        function previewDuties() {
             const warningMsg = document.getElementById("warning-msg");
             warningMsg.innerText = "";
 
@@ -456,18 +418,8 @@
                 }
             }
 
-            let remainingSoldiers = allSoldiers.filter(name => !assignedGuards.includes(name));
-            const totalCleaningNeeded = 6 + 22;
-
-            if (remainingSoldiers.length < totalCleaningNeeded) {
-                let missingCount = totalCleaningNeeded - remainingSoldiers.length;
-                warningMsg.innerText = `⚠️ 注意：目前排了 ${assignedGuards.length} 人站哨，導致打掃人數少 ${missingCount} 人（剩餘 ${remainingSoldiers.length} 人，打掃共需 ${totalCleaningNeeded} 人）。`;
-            }
-
-            shuffle(remainingSoldiers);
-
-            let resultsHTML = `<h2>📋 今日總體任務分派結果</h2>`;
-            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派 (免打掃)</h3><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 13px;">`;
+            let resultsHTML = `<h2>📋 排班與打掃預覽結果</h2>`;
+            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派</h3><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 13px;">`;
             if (Object.keys(guardDetails).length === 0) {
                 resultsHTML += `<div style="color: #7f8c8d; grid-column: span 3;">（目前尚未選擇任何排哨人員）</div>`;
             } else {
@@ -477,41 +429,66 @@
             }
             resultsHTML += `</div></div>`;
 
+            document.getElementById("results").innerHTML = resultsHTML;
+        }
+
+        // 點擊按鈕直接開起列印/轉存 PDF 視窗
+        function exportToPDF() {
+            previewDuties();
+            window.print();
+        }
+
+        // 第二頁：亂數產生打掃人員
+        function generateRandomCleaning() {
+            const assignedGuards = getAssignedGuards();
+
+            // 從指定的 26 人中，過濾掉今天已經被排到哨的人
+            let availableCleaners = targetCleaningSoldiers.filter(name => !assignedGuards.includes(name));
+
+            shuffle(availableCleaners);
+
+            let totalNeeded = 6 + 22; // 28個名額
+            let resultsHTML = `<h2>🧹 亂數打掃抽籤結果</h2>`;
+
+            if (availableCleaners.length < totalNeeded) {
+                resultsHTML += `<div class="warning">⚠️ 注意：可打掃人數（${availableCleaners.length}人）小於總需求（${totalNeeded}人），部分區域可能無法補滿。</div>`;
+            }
+
             let startIndex = 0;
 
-            resultsHTML += `<h2>☀️ 早上打掃任務</h2>`;
+            resultsHTML += `<h3>☀️ 早上打掃任務</h3>`;
             for (const [area, count] of Object.entries(morningDuties)) {
-                let assignedGroup = [];
-                if (startIndex < remainingSoldiers.length) {
-                    let endIndex = Math.min(startIndex + count, remainingSoldiers.length);
-                    assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
-                    startIndex = endIndex;
+                let group = [];
+                if (startIndex < availableCleaners.length) {
+                    let end = Math.min(startIndex + count, availableCleaners.length);
+                    group = availableCleaners.slice(startIndex, end);
+                    startIndex = end;
                 }
                 resultsHTML += `
                 <div class="result-card">
                     <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
-                    <p>${assignedGroup.length > 0 ? assignedGroup.join('、') : '<span style="color:#e74c3c;">人數不足，未分配</span>'}</p>
+                    <p>${group.length > 0 ? group.join('、') : '<span style="color:#e74c3c;">人數不足</span>'}</p>
                 </div>
             `;
             }
 
-            resultsHTML += `<h2>🌤️ 下午打掃任務</h2>`;
+            resultsHTML += `<h3>🌤️ 下午打掃任務</h3>`;
             for (const [area, count] of Object.entries(afternoonDuties)) {
-                let assignedGroup = [];
-                if (startIndex < remainingSoldiers.length) {
-                    let endIndex = Math.min(startIndex + count, remainingSoldiers.length);
-                    assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
-                    startIndex = endIndex;
+                let group = [];
+                if (startIndex < availableCleaners.length) {
+                    let end = Math.min(startIndex + count, availableCleaners.length);
+                    group = availableCleaners.slice(startIndex, end);
+                    startIndex = end;
                 }
                 resultsHTML += `
                 <div class="result-card">
                     <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
-                    <p>${assignedGroup.length > 0 ? assignedGroup.join('、') : '<span style="color:#e74c3c;">人數不足，未分配</span>'}</p>
+                    <p>${group.length > 0 ? group.join('、') : '<span style="color:#e74c3c;">人數不足</span>'}</p>
                 </div>
             `;
             }
 
-            document.getElementById("results").innerHTML = resultsHTML;
+            document.getElementById("cleaning-results").innerHTML = resultsHTML;
         }
 
         window.onload = initDropdowns;
