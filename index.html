@@ -133,14 +133,14 @@
 
         <!-- 每日排哨設定區塊 -->
         <div class="section-box">
-            <h3>🛡️ 每日固定崗位排班表</h3>
-            <p style="font-size: 12px; color: #666; margin-top: 0;">提示：凡是被指派到以下任何哨位的人員，系統將<strong>自動免除</strong>其當天的打掃勤務！
-            </p>
+            <h3>🛡️ 每日固定崗位排班表 (22 - 08)</h3>
+            <p style="font-size: 12px; color: #666; margin-top: 0;">
+                提示：凡是被指派到以下任何哨位或車輛任務的人員，系統將<strong>自動免除</strong>其當天的打掃勤務！</p>
 
             <table class="duty-table" id="guard-table">
                 <thead>
                     <tr>
-                        <th>時段 / 項目</th>
+                        <th>時段</th>
                         <th>安官</th>
                         <th>哨長</th>
                         <th>巡查</th>
@@ -151,28 +151,31 @@
                         <td><strong>22 - 24</strong></td>
                         <td><select class="guard-select" data-post="安官 22-24"></select></td>
                         <td><select class="guard-select" data-post="哨長 22-24"></select></td>
-                        <td><select class="guard-select" data-post="巡查"></select></td>
+                        <td><select class="guard-select" data-post="巡查 22-24"></select></td>
                     </tr>
                     <tr>
                         <td><strong>24 - 02</strong></td>
                         <td><select class="guard-select" data-post="安官 24-02"></select></td>
                         <td><select class="guard-select" data-post="哨長 24-02"></select></td>
-                        <td rowspan="4" style="background: #f1f5f9; color: #94a3b8; font-size: 12px;">（巡查免兼其他）</td>
+                        <td><select class="guard-select" data-post="巡查 24-02"></select></td>
                     </tr>
                     <tr>
                         <td><strong>02 - 04</strong></td>
                         <td><select class="guard-select" data-post="安官 02-04"></select></td>
                         <td><select class="guard-select" data-post="哨長 02-04"></select></td>
+                        <td><select class="guard-select" data-post="巡查 02-04"></select></td>
                     </tr>
                     <tr>
                         <td><strong>04 - 06</strong></td>
                         <td><select class="guard-select" data-post="安官 04-06"></select></td>
                         <td><select class="guard-select" data-post="哨長 04-06"></select></td>
+                        <td><select class="guard-select" data-post="巡查 04-06"></select></td>
                     </tr>
                     <tr>
                         <td><strong>06 - 08</strong></td>
                         <td><select class="guard-select" data-post="安官 06-08"></select></td>
                         <td><select class="guard-select" data-post="哨長 06-08"></select></td>
+                        <td><select class="guard-select" data-post="巡查 06-08"></select></td>
                     </tr>
                 </tbody>
             </table>
@@ -288,9 +291,9 @@
             let resultsHTML = `<h2>📋 今日總體任務分派結果</h2>`;
 
             // 顯示固定哨位結果
-            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派 (免打掃)</h3><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; font-size: 14px;">`;
+            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派 (免打掃)</h3><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 13px;">`;
             if (Object.keys(guardDetails).length === 0) {
-                resultsHTML += `<div style="color: #7f8c8d;">（目前尚未選擇任何排哨人員）</div>`;
+                resultsHTML += `<div style="color: #7f8c8d; grid-column: span 3;">（目前尚未選擇任何排哨人員）</div>`;
             } else {
                 for (const [post, person] of Object.entries(guardDetails)) {
                     resultsHTML += `<div>• <strong>${post}</strong>：${person}</div>`;
@@ -312,7 +315,7 @@
                 resultsHTML += `
                 <div class="result-card">
                     <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
-                    <p>${assignedGroup.length > 0 ? assignedGroup.join('、') : '<span style="color:e74c3c;">人數不足，未分配</span>'}</p>
+                    <p>${assignedGroup.length > 0 ? assignedGroup.join('、') : '<span style="color:#e74c3c;">人數不足，未分配</span>'}</p>
                 </div>
             `;
             }
