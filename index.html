@@ -1,15 +1,339 @@
-import random
+<!DOCTYPE html>
+<html lang="zh-TW">
 
-# 1. 建立打掃人員與打掃區域的列表
-soldiers = [ "元泰", "志豪", "家豪", "冠宇" ]
-areas = [ "中山室", "器材室", "連部廁所", "走廊" ]
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營區排哨與打掃分配系統</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
 
-# 2. 將人員名單隨機打亂（就像洗牌一樣）
-random.shuffle(soldiers)
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
-print("--- 營區打掃分配結果 ---")
+        h1,
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
 
-# 3. 用迴圈把打掃人員跟區域依序配對
-# zip() 可以把兩個列表黏在一起同時讀取
-for soldier, area in zip(soldiers, areas):
-    print(soldier + "負責打掃： " + area)
+        h1 {
+            font-size: 22px;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 17px;
+            margin-top: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+
+        .section-box {
+            background: #f8f9fa;
+            border: 1px solid #e1e8ed;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* 排哨表格樣式 */
+        table.duty-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        table.duty-table th,
+        table.duty-table td {
+            border: 1px solid #cbd5e1;
+            padding: 6px;
+            text-align: center;
+        }
+
+        table.duty-table th {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        table.duty-table select {
+            width: 100%;
+            padding: 4px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .result-card {
+            background: #fdfefe;
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #3498db;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .result-card h4 {
+            margin: 0 0 4px 0;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .result-card p {
+            margin: 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .warning {
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🪖 營區每日排哨與打掃分配</h1>
+
+        <!-- 每日排哨設定區塊 -->
+        <div class="section-box">
+            <h3>🛡️ 每日固定崗位排班表</h3>
+            <p style="font-size: 12px; color: #666; margin-top: 0;">請為各個時段與職務選定對應的人員：</p>
+
+            <table class="duty-table" id="guard-table">
+                <thead>
+                    <tr>
+                        <th>時段 / 項目</th>
+                        <th>安官</th>
+                        <th>哨長</th>
+                        <th>巡查</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>22 - 24</strong></td>
+                        <td><select class="guard-select" data-post="安官 22-24"></select></td>
+                        <td><select class="guard-select" data-post="哨長 22-24"></select></td>
+                        <td><select class="guard-select" data-post="巡查"></select></td>
+                    </tr>
+                    <tr>
+                        <td><strong>24 - 02</strong></td>
+                        <td><select class="guard-select" data-post="安官 24-02"></select></td>
+                        <td><select class="guard-select" data-post="哨長 24-02"></select></td>
+                        <td rowspan="4" style="background: #f1f5f9; color: #94a3b8; font-size: 12px;">（巡查通常為固定或免兼）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>02 - 04</strong></td>
+                        <td><select class="guard-select" data-post="安官 02-04"></select></td>
+                        <td><select class="guard-select" data-post="哨長 02-04"></select></td>
+                    </tr>
+                    <tr>
+                        <td><strong>04 - 06</strong></td>
+                        <td><select class="guard-select" data-post="安官 04-06"></select></td>
+                        <td><select class="guard-select" data-post="哨長 04-06"></select></td>
+                    </tr>
+                    <tr>
+                        <td><strong>06 - 08</strong></td>
+                        <td><select class="guard-select" data-post="安官 06-08"></select></td>
+                        <td><select class="guard-select" data-post="哨長 06-08"></select></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 車輛派遣相關 -->
+            <table class="duty-table" style="margin-top: 15px;">
+                <thead>
+                    <tr>
+                        <th>車輛派遣項目</th>
+                        <th>駕駛</th>
+                        <th>車長</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>輕戰 (1.75噸)</strong></td>
+                        <td><select class="guard-select" data-post="輕戰 駕駛"></select></td>
+                        <td><select class="guard-select" data-post="輕戰 車長"></select></td>
+                    </tr>
+                    <tr>
+                        <td><strong>救護 (3.5噸)</strong></td>
+                        <td><select class="guard-select" data-post="救護 駕駛"></select></td>
+                        <td><select class="guard-select" data-post="救護 車長"></select></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button onclick="generateAllDuties()">🎲 自動排哨並隨機分配剩餘打掃任務</button>
+
+        <div id="warning-msg" class="warning"></div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // 完整的資料庫人員名單（共 28 人）
+        const allSoldiers = [
+            "吳元泰", "盧藉汶", "吳炳憲", "廖春祿", "彭詠然", "曹哲溥", "林進宏", "歐家榮",
+            "石偉莖", "蘇俊憲", "許乃靑", "許文豪", "陳祖祥", "吳鴻祥", "廖祐笙", "張富員",
+            "張釗仁", "彭俊翔", "曾家慶", "李建祥", "林于聖", "林奕瑋", "林庭安", "林志論",
+            "歐宸宇", "王廷瑋", "田啟倫", "葉政榮", "葉重達", "蔡佳宏", "蔡士順", "蔡英政",
+            "蔡貴元", "薛仲恩", "蘇小龍", "許哲銘", "許皓喧", "許雅登", "邵昱晟", "顏郁凱",
+            "魏子玹", "黃昱豪" // （包含你名單裡所有的全名資料庫）
+        ]; // 為了確保彈性，這裡直接收入完整名單
+
+        // 早上與下午打掃任務與所需人數
+        const morningDuties = { "升旗": 3, "冰桶": 3 }; // 共 6 人
+        const afternoonDuties = {
+            "下寢浴廁含洗手台": 4,
+            "上寢浴廁含洗手台": 4,
+            "下寢垃圾": 3,
+            "上寢垃圾": 3,
+            "冰桶、降旗": 3,
+            "下寢寢室收餐勤": 5
+        }; // 共 22 人 (總共需要 28 扣除哨兵人數)
+
+        // 初始化下拉選單
+        function initDropdowns() {
+            const selects = document.querySelectorAll('.guard-select');
+            selects.forEach(select => {
+                let options = `<option value="">-- 請選擇人員 --</option>`;
+                allSoldiers.forEach(name => {
+                    options += `<option value="${name}">${name}</option>`;
+                });
+                select.innerHTML = options;
+            });
+        }
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function generateAllDuties() {
+            const warningMsg = document.getElementById("warning-msg");
+            warningMsg.innerText = "";
+
+            // 1. 收集所有已被選去排哨的人
+            const guardSelects = document.querySelectorAll('.guard-select');
+            let assignedGuards = [];
+            let guardDetails = {};
+
+            guardSelects.forEach(select => {
+                let postName = select.getAttribute('data-post');
+                let person = select.value;
+                if (person) {
+                    if (assignedGuards.includes(person)) {
+                        warningMsg.innerText = `⚠️ 警告：人員 "${person}" 被重複指派到多個哨位！`;
+                        return;
+                    }
+                    assignedGuards.push(person);
+                    guardDetails[postName] = person;
+                }
+            });
+
+            // 2. 計算剩餘可用於打掃的人員
+            let remainingSoldiers = allSoldiers.filter(name => !assignedGuards.includes(name));
+
+            // 總共打掃需要的人數 (6 + 22 = 28人)
+            const totalCleaningNeeded = 6 + 22;
+
+            if (remainingSoldiers.length < totalCleaningNeeded) {
+                warningMsg.innerText = `⚠️ 警告：排哨人數過多，剩餘可打掃人數不足 ${totalCleaningNeeded} 人！(目前剩餘 ${remainingSoldiers.length} 人)`;
+                document.getElementById("results").innerHTML = "";
+                return;
+            }
+
+            // 3. 隨機洗牌剩餘打掃人員
+            shuffle(remainingSoldiers);
+
+            let resultsHTML = `<h2>📋 今日總體任務分派結果</h2>`;
+
+            // 顯示排哨結果摘要
+            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派</h3><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; font-size: 14px;">`;
+            for (const [post, person] of Object.entries(guardDetails)) {
+                resultsHTML += `<div>• <strong>${post}</strong>：${person}</div>`;
+            }
+            resultsHTML += `</div></div>`;
+
+            let startIndex = 0;
+
+            // 顯示早上打掃任務
+            resultsHTML += `<h2>☀️ 早上打掃任務</h2>`;
+            for (const [area, count] of Object.entries(morningDuties)) {
+                let endIndex = startIndex + count;
+                let assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
+                resultsHTML += `
+                <div class="result-card">
+                    <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
+                    <p>${assignedGroup.join('、')}</p>
+                </div>
+            `;
+                startIndex = endIndex;
+            }
+
+            // 顯示下午打掃任務
+            resultsHTML += `<h2>🌤️ 下午打掃任務</h2>`;
+            for (const [area, count] of Object.entries(afternoonDuties)) {
+                let endIndex = startIndex + count;
+                let assignedGroup = remainingSoldiers.slice(startIndex, endIndex);
+                resultsHTML += `
+                <div class="result-card">
+                    <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
+                    <p>${assignedGroup.join('、')}</p>
+                </div>
+            `;
+                startIndex = endIndex;
+            }
+
+            document.getElementById("results").innerHTML = resultsHTML;
+        }
+
+        // 網頁載入時初始化選單
+        window.onload = initDropdowns;
+    </script>
+
+</body>
+
+</html>
