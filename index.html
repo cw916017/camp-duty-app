@@ -291,10 +291,10 @@
                                     onchange="updateGuardDropdowns()"></select></td>
                         </tr>
                         <tr>
-                            <td><strong>救護 (3.5噸)</strong></td>
-                            <td><select class="guard-select" data-type="all" data-post="救護 駕駛"
+                            <td><strong>悍救</strong></td>
+                            <td><select class="guard-select" data-type="all" data-post="悍救 駕駛"
                                     onchange="updateGuardDropdowns()"></select></td>
-                            <td><select class="guard-select" data-type="all" data-post="救護 車長"
+                            <td><select class="guard-select" data-type="all" data-post="悍救 車長"
                                     onchange="updateGuardDropdowns()"></select></td>
                         </tr>
                     </tbody>
@@ -361,18 +361,14 @@
             "下寢寢室收餐勤": 5
         };
 
-        // 依序排列的 5 個站哨時段索引 (每班 2 小時)
-        // 0: 22-24, 1: 24-02, 2: 02-04, 3: 04-06, 4: 06-08
         function initDropdowns() {
             updateGuardDropdowns();
         }
 
-        // 核心：動態更新所有下拉選單（實作 6 小時休息限制與防重複點選）
         function updateGuardDropdowns() {
             const rows = document.querySelectorAll('#guard-table tbody tr');
 
-            // 1. 收集每個時段（0~4）已經被選走的人員
-            let slotAssigned = {}; // { slotIndex: [PersonA, PersonB, PersonC] }
+            let slotAssigned = {};
             rows.forEach((row, index) => {
                 slotAssigned[index] = [];
                 let selects = row.querySelectorAll('.guard-select');
@@ -381,39 +377,31 @@
                 });
             });
 
-            // 2. 針對每一個 select 重新建構可選名單
             rows.forEach((row, slotIndex) => {
                 let selects = row.querySelectorAll('.guard-select');
                 selects.forEach(select => {
                     let type = select.getAttribute('data-type');
-                    let currentVal = select.value; // 保留目前已選的值
+                    let currentVal = select.value;
                     let baseList = allSoldiers;
                     if (type === 'guard-an') baseList = anList;
                     else if (type === 'guard-commander') baseList = commanderList;
                     else if (type === 'guard-patrol') baseList = patrolList;
 
-                    // 計算 6 小時限制內被禁止的人員
-                    // 因為每班 2 小時，6 小時休息限制代表前後 3 個時段內不能重複站哨 (即自己及前後各 3 個時段內不可再站)
                     let forbiddenPersons = [];
                     for (let i = 0; i < rows.length; i++) {
-                        // 如果時距在 3 個時段以內（絕對值 <= 3，相當於 6 小時內）
                         if (Math.abs(i - slotIndex) <= 3) {
                             if (slotAssigned[i]) {
                                 slotAssigned[i].forEach(p => {
-                                    // 如果不是當前 select 自己選的人，就加入禁選名單
-                                    // 透過檢查該 select 是否屬於該行與該人來區分
                                     forbiddenPersons.push(p);
                                 });
                             }
                         }
                     }
 
-                    // 移除當前 select 自己身上的值，避免把自己濾掉
                     if (currentVal) {
                         forbiddenPersons = forbiddenPersons.filter(p => p !== currentVal);
                     }
 
-                    // 產生選項
                     let options = `<option value="">-- 請選擇人員 --</option>`;
                     baseList.forEach(name => {
                         if (!forbiddenPersons.includes(name)) {
@@ -425,7 +413,6 @@
                 });
             });
 
-            // 同時更新車輛派遣的選單（車輛派遣不受時段 6 小時限制，只需防重複選取）
             updateVehicleDropdowns();
         }
 
