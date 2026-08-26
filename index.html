@@ -211,7 +211,7 @@
     </div>
 
     <script>
-        // 完整 28 人名單資料庫（用於打掃分配與車輛派遣）
+        // 完整 42 人名單資料庫（用於打掃分配與車輛派遣）
         const allSoldiers = [
             "吳元泰", "盧精汶", "吳炳憲", "廖春祿", "彭詠然", "曹哲溥", "林進宏", "歐家榮",
             "石偉荃", "蘇俊憲", "許乃靑", "許文豪", "陳祖祥", "吳鴻祥", "廖祐笙", "張富員",
@@ -221,10 +221,20 @@
             "魏子玹", "黃昱豪"
         ];
 
-        // 各崗位指定名單
-        const anList = ["方喬毅", "許宗憲", "許家銘", "施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
-        const commanderList = ["施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
+        // 1. 巡查名單
         const patrolList = ["余星宗", "林隆宏", "許書銘", "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
+
+        // 2. 安官名單：全部人扣除巡查的人
+        const anList = allSoldiers.filter(name => !patrolList.includes(name));
+
+        // 3. 哨長排除的名單：巡查的人 + 指定的另外 10 人
+        const additionalExcludeForCommander = [
+            "林進宏", "石偉荃", "許乃靑", "陳祖祥", "張富員", "林于聖", "林奕瑋", "田啟倫", "葉政榮", "吳元泰"
+        ];
+        const commanderExclude = [...patrolList, ...additionalExcludeForCommander];
+
+        // 4. 哨長名單：全部人扣除上述所有排除的人
+        const commanderList = allSoldiers.filter(name => !commanderExclude.includes(name));
 
         const morningDuties = { "升旗": 3, "冰桶": 3 }; // 需 6 人
         const afternoonDuties = {
