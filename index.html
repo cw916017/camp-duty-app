@@ -221,9 +221,22 @@
             "魏子玹", "黃昱豪"
         ];
 
-        // 各崗位指定名單
-        const anList = ["方喬毅", "許宗憲", "許家銘", "施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
-        const commanderList = ["施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
+        // 定義安官排除的那 6 人
+        const excludeAn = ["盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
+
+        // 定義哨長排除的那 15 人（6人 + 9人）
+        const excludeCommander = [
+            "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲",
+            "林進宏", "石偉荃", "許乃靑", "陳祖祥", "張富員", "林于聖", "林奕瑋", "田啟倫", "葉政榮"
+        ];
+
+        // 1. 安官名單：總名單扣除 6 人
+        const anList = allSoldiers.filter(name => !excludeAn.includes(name));
+
+        // 2. 哨長名單：總名單扣除 15 人
+        const commanderList = allSoldiers.filter(name => !excludeCommander.includes(name));
+
+        // 3. 巡查名單：維持包含原本 3 人加上那 6 人
         const patrolList = ["余星宗", "林隆宏", "許書銘", "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
 
         const morningDuties = { "升旗": 3, "冰桶": 3 }; // 需 6 人
