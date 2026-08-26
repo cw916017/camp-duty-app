@@ -212,7 +212,8 @@
         <div id="page-1" class="page-section active">
             <div class="section-box" id="pdf-export-area">
                 <h3>🛡️ 每日固定崗位排班表 (22 - 08)</h3>
-                <p style="font-size: 12px; color: #666; margin-top: 0;">提示：在此頁排定哨位後，點擊下方按鈕即可產生正式排班與打掃檢視畫面以列印或轉存 PDF。</p>
+                <p style="font-size: 12px; color: #666; margin-top: 0;">
+                    提示：人員若在某時段被選中，系統會自動依<strong>6小時休息限制</strong>禁止其在前後時段重複選取；同時排哨人員也將自動免除打掃。</p>
 
                 <table class="duty-table" id="guard-table">
                     <thead>
@@ -224,45 +225,50 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr data-slot-index="0" data-hours="22-24">
                             <td><strong>22 - 24</strong></td>
-                            <td><select class="guard-select" data-type="guard-an" data-post="安官 22-24"></select></td>
-                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 22-24"></select>
-                            </td>
-                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 22-24"></select>
-                            </td>
+                            <td><select class="guard-select" data-type="guard-an" data-post="安官 22-24"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 22-24"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 22-24"
+                                    onchange="updateGuardDropdowns()"></select></td>
                         </tr>
-                        <tr>
+                        <tr data-slot-index="1" data-hours="24-02">
                             <td><strong>24 - 02</strong></td>
-                            <td><select class="guard-select" data-type="guard-an" data-post="安官 24-02"></select></td>
-                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 24-02"></select>
-                            </td>
-                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 24-02"></select>
-                            </td>
+                            <td><select class="guard-select" data-type="guard-an" data-post="安官 24-02"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 24-02"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 24-02"
+                                    onchange="updateGuardDropdowns()"></select></td>
                         </tr>
-                        <tr>
+                        <tr data-slot-index="2" data-hours="02-04">
                             <td><strong>02 - 04</strong></td>
-                            <td><select class="guard-select" data-type="guard-an" data-post="安官 02-04"></select></td>
-                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 02-04"></select>
-                            </td>
-                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 02-04"></select>
-                            </td>
+                            <td><select class="guard-select" data-type="guard-an" data-post="安官 02-04"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 02-04"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 02-04"
+                                    onchange="updateGuardDropdowns()"></select></td>
                         </tr>
-                        <tr>
+                        <tr data-slot-index="3" data-hours="04-06">
                             <td><strong>04 - 06</strong></td>
-                            <td><select class="guard-select" data-type="guard-an" data-post="安官 04-06"></select></td>
-                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 04-06"></select>
-                            </td>
-                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 04-06"></select>
-                            </td>
+                            <td><select class="guard-select" data-type="guard-an" data-post="安官 04-06"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 04-06"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 04-06"
+                                    onchange="updateGuardDropdowns()"></select></td>
                         </tr>
-                        <tr>
+                        <tr data-slot-index="4" data-hours="06-08">
                             <td><strong>06 - 08</strong></td>
-                            <td><select class="guard-select" data-type="guard-an" data-post="安官 06-08"></select></td>
-                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 06-08"></select>
-                            </td>
-                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 06-08"></select>
-                            </td>
+                            <td><select class="guard-select" data-type="guard-an" data-post="安官 06-08"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-commander" data-post="哨長 06-08"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="guard-patrol" data-post="巡查 06-08"
+                                    onchange="updateGuardDropdowns()"></select></td>
                         </tr>
                     </tbody>
                 </table>
@@ -279,13 +285,17 @@
                     <tbody>
                         <tr>
                             <td><strong>輕戰 (1.75噸)</strong></td>
-                            <td><select class="guard-select" data-type="all" data-post="輕戰 駕駛"></select></td>
-                            <td><select class="guard-select" data-type="all" data-post="輕戰 車長"></select></td>
+                            <td><select class="guard-select" data-type="all" data-post="輕戰 駕駛"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="all" data-post="輕戰 車長"
+                                    onchange="updateGuardDropdowns()"></select></td>
                         </tr>
                         <tr>
                             <td><strong>救護 (3.5噸)</strong></td>
-                            <td><select class="guard-select" data-type="all" data-post="救護 駕駛"></select></td>
-                            <td><select class="guard-select" data-type="all" data-post="救護 車長"></select></td>
+                            <td><select class="guard-select" data-type="all" data-post="救護 駕駛"
+                                    onchange="updateGuardDropdowns()"></select></td>
+                            <td><select class="guard-select" data-type="all" data-post="救護 車長"
+                                    onchange="updateGuardDropdowns()"></select></td>
                         </tr>
                     </tbody>
                 </table>
@@ -322,7 +332,6 @@
         const extraAnSoldiers = ["方喬毅", "許宗憲", "許家銘", "施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
         const allSoldiers = Array.from(new Set([...baseSoldiers, ...extraAnSoldiers]));
 
-        // 指定的 26 位打掃人員名單
         const targetCleaningSoldiers = [
             "吳元泰", "彭詠然", "曹哲溥", "吳鴻祥", "廖祐笙", "張釗仁", "彭俊翔", "曾家慶",
             "李建祥", "林庭安", "林志諭", "歐宸宇", "田啟倫", "葉重達", "蔡佳宏", "蔡士頎",
@@ -352,19 +361,89 @@
             "下寢寢室收餐勤": 5
         };
 
+        // 依序排列的 5 個站哨時段索引 (每班 2 小時)
+        // 0: 22-24, 1: 24-02, 2: 02-04, 3: 04-06, 4: 06-08
         function initDropdowns() {
-            const selects = document.querySelectorAll('.guard-select');
-            selects.forEach(select => {
-                let type = select.getAttribute('data-type');
-                let targetList = allSoldiers;
+            updateGuardDropdowns();
+        }
 
-                if (type === 'guard-an') targetList = anList;
-                else if (type === 'guard-commander') targetList = commanderList;
-                else if (type === 'guard-patrol') targetList = patrolList;
+        // 核心：動態更新所有下拉選單（實作 6 小時休息限制與防重複點選）
+        function updateGuardDropdowns() {
+            const rows = document.querySelectorAll('#guard-table tbody tr');
 
+            // 1. 收集每個時段（0~4）已經被選走的人員
+            let slotAssigned = {}; // { slotIndex: [PersonA, PersonB, PersonC] }
+            rows.forEach((row, index) => {
+                slotAssigned[index] = [];
+                let selects = row.querySelectorAll('.guard-select');
+                selects.forEach(sel => {
+                    if (sel.value) slotAssigned[index].push(sel.value);
+                });
+            });
+
+            // 2. 針對每一個 select 重新建構可選名單
+            rows.forEach((row, slotIndex) => {
+                let selects = row.querySelectorAll('.guard-select');
+                selects.forEach(select => {
+                    let type = select.getAttribute('data-type');
+                    let currentVal = select.value; // 保留目前已選的值
+                    let baseList = allSoldiers;
+                    if (type === 'guard-an') baseList = anList;
+                    else if (type === 'guard-commander') baseList = commanderList;
+                    else if (type === 'guard-patrol') baseList = patrolList;
+
+                    // 計算 6 小時限制內被禁止的人員
+                    // 因為每班 2 小時，6 小時休息限制代表前後 3 個時段內不能重複站哨 (即自己及前後各 3 個時段內不可再站)
+                    let forbiddenPersons = [];
+                    for (let i = 0; i < rows.length; i++) {
+                        // 如果時距在 3 個時段以內（絕對值 <= 3，相當於 6 小時內）
+                        if (Math.abs(i - slotIndex) <= 3) {
+                            if (slotAssigned[i]) {
+                                slotAssigned[i].forEach(p => {
+                                    // 如果不是當前 select 自己選的人，就加入禁選名單
+                                    // 透過檢查該 select 是否屬於該行與該人來區分
+                                    forbiddenPersons.push(p);
+                                });
+                            }
+                        }
+                    }
+
+                    // 移除當前 select 自己身上的值，避免把自己濾掉
+                    if (currentVal) {
+                        forbiddenPersons = forbiddenPersons.filter(p => p !== currentVal);
+                    }
+
+                    // 產生選項
+                    let options = `<option value="">-- 請選擇人員 --</option>`;
+                    baseList.forEach(name => {
+                        if (!forbiddenPersons.includes(name)) {
+                            let selectedAttr = (name === currentVal) ? 'selected' : '';
+                            options += `<option value="${name}" ${selectedAttr}>${name}</option>`;
+                        }
+                    });
+                    select.innerHTML = options;
+                });
+            });
+
+            // 同時更新車輛派遣的選單（車輛派遣不受時段 6 小時限制，只需防重複選取）
+            updateVehicleDropdowns();
+        }
+
+        function updateVehicleDropdowns() {
+            const vehicleSelects = document.querySelectorAll('table.duty-table:not(#guard-table) .guard-select');
+            let selectedVehicles = [];
+            vehicleSelects.forEach(sel => {
+                if (sel.value) selectedVehicles.push(sel.value);
+            });
+
+            vehicleSelects.forEach(select => {
+                let currentVal = select.value;
                 let options = `<option value="">-- 請選擇人員 --</option>`;
-                targetList.forEach(name => {
-                    options += `<option value="${name}">${name}</option>`;
+                allSoldiers.forEach(name => {
+                    if (!selectedVehicles.includes(name) || name === currentVal) {
+                        let selectedAttr = (name === currentVal) ? 'selected' : '';
+                        options += `<option value="${name}" ${selectedAttr}>${name}</option>`;
+                    }
                 });
                 select.innerHTML = options;
             });
@@ -384,7 +463,7 @@
             guardSelects.forEach(select => {
                 if (select.value) assigned.push(select.value);
             });
-            return assigned;
+            return Array.from(new Set(assigned));
         }
 
         function shuffle(array) {
@@ -432,22 +511,18 @@
             document.getElementById("results").innerHTML = resultsHTML;
         }
 
-        // 點擊按鈕直接開起列印/轉存 PDF 視窗
         function exportToPDF() {
             previewDuties();
             window.print();
         }
 
-        // 第二頁：亂數產生打掃人員
         function generateRandomCleaning() {
             const assignedGuards = getAssignedGuards();
-
-            // 從指定的 26 人中，過濾掉今天已經被排到哨的人
             let availableCleaners = targetCleaningSoldiers.filter(name => !assignedGuards.includes(name));
 
             shuffle(availableCleaners);
 
-            let totalNeeded = 6 + 22; // 28個名額
+            let totalNeeded = 6 + 22;
             let resultsHTML = `<h2>🧹 亂數打掃抽籤結果</h2>`;
 
             if (availableCleaners.length < totalNeeded) {
