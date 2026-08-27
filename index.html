@@ -34,17 +34,7 @@
         h1 {
             font-size: 20px;
             margin-top: 0;
-            margin-bottom: 4px;
-        }
-
-        /* 浮水印／出品字眼樣式 */
-        .watermark-banner {
-            text-align: center;
-            font-size: 12px;
-            color: #94a3b8;
-            letter-spacing: 1px;
             margin-bottom: 15px;
-            font-weight: 500;
         }
 
         h2 {
@@ -250,7 +240,6 @@
 
     <div class="container">
         <h1>🪖 營區排哨與打掃分配系統</h1>
-        <div class="watermark-banner">✨ 元泰出品 · 版權所有 ✨</div>
 
         <!-- 分頁按鈕 -->
         <div class="tab-buttons">
@@ -405,29 +394,29 @@
 
     <script>
         const baseSoldiers = [
-            "吳元泰", "吳鴻祥", "彭詠然", "曹哲溥",
-            "廖佑笙", "張釗仁", "彭俊翔", "曾家慶",
-            "李建祥", "林庭安", "林志諭", "歐宸宇",
-            "王廷瑋", "田啟倫", "葉重達", "蔡佳宏",
-            "蔡士頎", "蔡英政", "蔡貴元", "薛仲恩",
-            "蘇小龍", "許哲銘", "許皓喧", "許雅登",
-            "邵昱晟", "顏郁凱", "魏子琁", "黃昱豪"
+            "吳Ｏ泰", "吳Ｏ祥", "彭Ｏ然", "曹Ｏ溥",
+            "廖Ｏ笙", "張Ｏ仁", "彭Ｏ翔", "曾Ｏ慶",
+            "李Ｏ祥", "林Ｏ安", "林Ｏ諭", "歐Ｏ宇",
+            "王Ｏ瑋", "田Ｏ倫", "葉Ｏ達", "蔡Ｏ宏",
+            "蔡Ｏ頎", "蔡Ｏ政", "蔡Ｏ元", "薛Ｏ恩",
+            "蘇Ｏ龍", "許Ｏ銘", "許Ｏ喧", "許Ｏ登",
+            "邵Ｏ晟", "顏Ｏ凱", "魏Ｏ琁", "黃Ｏ豪"
         ];
 
         const allSoldiers = Array.from(new Set([...baseSoldiers]));
 
-        const patrolList = ["余星宗", "林隆宏", "許書銘", "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
+        const patrolList = ["余Ｏ宗", "林Ｏ宏", "許Ｏ銘", "盧Ｏ汶", "廖Ｏ祿", "吳Ｏ憲", "許Ｏ豪", "歐Ｏ榮", "蘇Ｏ憲"];
         const baseAnList = allSoldiers.filter(name => !patrolList.includes(name));
         const anList = Array.from(new Set([...baseAnList]));
 
         const additionalExcludeForCommander = [
-            "林進宏", "石偉荃", "許乃靑", "陳祖祥", "張富員", "林于聖", "林奕瑋", "田啟倫", "葉政榮", "吳元泰"
+            "林Ｏ宏", "石Ｏ荃", "許Ｏ靑", "陳Ｏ祥", "張Ｏ員", "林Ｏ聖", "林Ｏ瑋", "田Ｏ倫", "葉Ｏ榮", "吳Ｏ泰"
         ];
         const commanderExclude = [...patrolList, ...additionalExcludeForCommander];
         const baseCommanderList = allSoldiers.filter(name => !commanderExclude.includes(name));
         const commanderList = Array.from(new Set([...baseCommanderList]));
 
-        const specialVehicleCommanders = ["林隆宏", "余星宗", "許書銘"];
+        const specialVehicleCommanders = ["林Ｏ宏", "余Ｏ宗", "許Ｏ銘"];
         const driverCommanderList = Array.from(new Set([...commanderList, ...specialVehicleCommanders]));
 
         // 打掃區域與預設人數 (皆為 1 人)
