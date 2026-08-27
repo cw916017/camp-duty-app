@@ -351,13 +351,6 @@
         const specialVehicleCommanders = ["林隆宏", "余星宗", "許書銘"];
         const driverCommanderList = Array.from(new Set([...commanderList, ...specialVehicleCommanders]));
 
-        const morningDuties = { "升旗": 3, "冰桶": 3 };
-        const afternoonDuties = {
-            "下寢浴廁含洗手台": 4, "上寢浴廁含洗手台": 4,
-            "下寢垃圾": 3, "上寢垃圾": 3,
-            "冰桶、降旗": 3, "下寢寢室收餐勤": 5
-        };
-
         function initDropdowns() {
             updateGuardDropdowns();
         }
@@ -419,7 +412,7 @@
                 let baseList = allSoldiers;
                 if (type === 'vehicle-commander') baseList = driverCommanderList;
 
-                let options = `<option value="">-- 請選擇人員 --</option>`;
+                let options = `<option value="">-- 請選擇選項 --</option>`;
                 baseList.forEach(name => {
                     if (!selectedVehicles.includes(name) || name === currentVal) {
                         let selectedAttr = (name === currentVal) ? 'selected' : '';
@@ -437,20 +430,33 @@
             document.getElementById(`page-${pageNum}`).classList.add('active');
         }
 
-        // 核心功能 1：將表格區塊轉為圖片下載
+        // 修改後的截圖下載與手機相簿整合
         function exportTableToImage() {
             const captureElement = document.getElementById('capture-area');
 
-            // 暫時把 select 內容轉成文字以便截圖清楚顯示
             html2canvas(captureElement, { scale: 2 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = '營區排班表.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+                canvas.toBlob(blob => {
+                    const file = new File([blob], "營區排班表.png", { type: "image/png" });
+
+                    // 如果手機支援系統分享（例如 iOS / Android 的原生分享選單）
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            title: '營區排班表',
+                            text: '📅 每日固定崗位與車輛排班表',
+                            files: [file]
+                        }).catch(error => console.log('分享取消', error));
+                    } else {
+                        // 傳統電腦或不支援分享時的下載行為
+                        const link = document.createElement('a');
+                        link.download = '營區排班表.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                    }
+                });
             });
         }
 
-        // 核心功能 2：啟動 LINE 分享
+        // 傳送到 LINE 按鈕（會直接帶圖片檔案或跳轉分享）
         function shareToLine() {
             const captureElement = document.getElementById('capture-area');
 
@@ -458,7 +464,6 @@
                 canvas.toBlob(blob => {
                     const file = new File([blob], "duty-table.png", { type: "image/png" });
 
-                    // 如果手機或瀏覽器支援原生分享（可直接帶入圖片檔案到 LINE）
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         navigator.share({
                             title: '營區排班表',
@@ -466,13 +471,12 @@
                             files: [file]
                         }).catch(error => console.log('分享取消', error));
                     } else {
-                        // 備用方案：如果不支援直接分享檔案，先下載圖片並開啟 LINE 分享連結
                         const link = document.createElement('a');
                         link.download = '營區排班表.png';
                         link.href = canvas.toDataURL('image/png');
                         link.click();
 
-                        alert('已自動下載排班圖片！即將為您開啟 LINE，請在聊天室中直接上傳剛剛下載的圖片即可。');
+                        alert('已自動下載排班圖片！即將為您開啟 LINE，請在聊天室中直接點擊相簿上傳剛剛下載的圖片即可。');
                         window.open('https://line.me/R/msg/text/?' + encodeURIComponent('📅 每日固定崗位與車輛排班表已產生，請檢視圖片！'), '_blank');
                     }
                 });
