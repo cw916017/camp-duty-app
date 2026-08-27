@@ -402,21 +402,19 @@
             "邵昱晟", "顏郁凱", "魏子琁", "黃昱豪"
         ];
 
-        const extraAnSoldiers = ["方喬毅", "許宗憲", "許家銘", "施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
-        const allSoldiers = Array.from(new Set([...baseSoldiers, ...extraAnSoldiers]));
+        // 移除了 extraAnSoldiers，全面只使用 28 位基本人員
+        const allSoldiers = Array.from(new Set([...baseSoldiers]));
 
         const patrolList = ["余星宗", "林隆宏", "許書銘", "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
         const baseAnList = allSoldiers.filter(name => !patrolList.includes(name));
-        const anList = Array.from(new Set([...baseAnList, ...extraAnSoldiers]));
+        const anList = Array.from(new Set([...baseAnList]));
 
         const additionalExcludeForCommander = [
             "林進宏", "石偉荃", "許乃靑", "陳祖祥", "張富員", "林于聖", "林奕瑋", "田啟倫", "葉政榮", "吳元泰"
         ];
         const commanderExclude = [...patrolList, ...additionalExcludeForCommander];
         const baseCommanderList = allSoldiers.filter(name => !commanderExclude.includes(name));
-
-        const extraCommanderSoldiers = ["施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
-        const commanderList = Array.from(new Set([...baseCommanderList, ...extraCommanderSoldiers]));
+        const commanderList = Array.from(new Set([...baseCommanderList]));
 
         const specialVehicleCommanders = ["林隆宏", "余星宗", "許書銘"];
         const driverCommanderList = Array.from(new Set([...commanderList, ...specialVehicleCommanders]));
