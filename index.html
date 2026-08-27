@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>營區排哨與打掃分配系統</title>
+    <!-- 引入 html2canvas 截圖套件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -131,12 +133,20 @@
             background-color: #2980b9;
         }
 
-        button.pdf-btn {
+        button.image-btn {
             background-color: #27ae60;
         }
 
-        button.pdf-btn:hover {
+        button.image-btn:hover {
             background-color: #219653;
+        }
+
+        button.line-btn {
+            background-color: #06c755;
+        }
+
+        button.line-btn:hover {
+            background-color: #05b24c;
         }
 
         .result-card {
@@ -166,34 +176,6 @@
             text-align: center;
             margin-top: 10px;
         }
-
-        /* PDF 列印專用樣式覆蓋 */
-        @media print {
-            body {
-                background: #fff;
-                padding: 0;
-            }
-
-            .tab-buttons,
-            .action-btn,
-            .section-box:not(#pdf-export-area),
-            select {
-                display: none !important;
-            }
-
-            .container {
-                box-shadow: none;
-                max-width: 100%;
-                padding: 0;
-            }
-
-            #pdf-export-area {
-                display: block !important;
-                border: none;
-                background: #fff;
-                padding: 0;
-            }
-        }
     </style>
 </head>
 
@@ -210,10 +192,11 @@
 
         <!-- ================= PAGE 1 ================= -->
         <div id="page-1" class="page-section active">
-            <div class="section-box" id="pdf-export-area">
-                <h3>🛡️ 每日固定崗位排班表 (22 - 08)</h3>
+            <!-- 截圖專用區塊 -->
+            <div class="section-box" id="capture-area">
+                <h3>🛡️ 每日固定崗位與車輛排班表</h3>
                 <p style="font-size: 12px; color: #666; margin-top: 0;">
-                    提示：人員若在某時段被選中，系統會自動依<strong>6小時休息限制</strong>禁止其在前後時段重複選取；同時排哨人員也將自動免除打掃。</p>
+                    提示：人員若在某時段被選中，系統會自動依 6 小時休息限制防呆。</p>
 
                 <table class="duty-table" id="guard-table">
                     <thead>
@@ -315,18 +298,17 @@
                 </table>
             </div>
 
-            <button class="action-btn" onclick="previewDuties()">🔍 預覽排班與自動打掃分配結果</button>
-            <button class="action-btn pdf-btn" onclick="exportToPDF()">📄 產生 PDF / 列印正式表單</button>
+            <button class="action-btn image-btn" onclick="exportTableToImage()">📷 下載排班表為圖片</button>
+            <button class="action-btn line-btn" onclick="shareToLine()">💚 傳送到 LINE 群組/聊天室</button>
 
             <div id="warning-msg" class="warning"></div>
-            <div id="results"></div>
         </div>
 
         <!-- ================= PAGE 2 ================= -->
         <div id="page-2" class="page-section">
             <div class="section-box">
                 <h3>🎲 每日打掃人員隨機抽籤系統</h3>
-                <p style="font-size: 13px; color: #666;">系統會自動抓取 26 位指定打掃人員，並自動排除在第一頁被排到哨位的人員，隨機分派打掃區域！</p>
+                <p style="font-size: 13px; color: #666;">系統會自動抓取指定人員，並排除第一頁排哨者。</p>
                 <button class="action-btn" onclick="generateRandomCleaning()">🎰 開始亂數抽籤分配打掃</button>
             </div>
             <div id="cleaning-results"></div>
@@ -363,22 +345,17 @@
         const commanderExclude = [...patrolList, ...additionalExcludeForCommander];
         const baseCommanderList = allSoldiers.filter(name => !commanderExclude.includes(name));
 
-        // 哨長名單（不包含林隆宏、余星宗、許書銘）
         const extraCommanderSoldiers = ["施淳方", "林冠廷", "劉勁毅", "石宇豪", "葉育安", "黃聲威"];
         const commanderList = Array.from(new Set([...baseCommanderList, ...extraCommanderSoldiers]));
 
-        // 車長專用名單（包含林隆宏、余星宗、許書銘，讓他們可以當車長但不當哨長）
         const specialVehicleCommanders = ["林隆宏", "余星宗", "許書銘"];
         const driverCommanderList = Array.from(new Set([...commanderList, ...specialVehicleCommanders]));
 
         const morningDuties = { "升旗": 3, "冰桶": 3 };
         const afternoonDuties = {
-            "下寢浴廁含洗手台": 4,
-            "上寢浴廁含洗手台": 4,
-            "下寢垃圾": 3,
-            "上寢垃圾": 3,
-            "冰桶、降旗": 3,
-            "下寢寢室收餐勤": 5
+            "下寢浴廁含洗手台": 4, "上寢浴廁含洗手台": 4,
+            "下寢垃圾": 3, "上寢垃圾": 3,
+            "冰桶、降旗": 3, "下寢寢室收餐勤": 5
         };
 
         function initDropdowns() {
@@ -387,7 +364,6 @@
 
         function updateGuardDropdowns() {
             const rows = document.querySelectorAll('#guard-table tbody tr');
-
             let slotAssigned = {};
             rows.forEach((row, index) => {
                 slotAssigned[index] = [];
@@ -411,16 +387,11 @@
                     for (let i = 0; i < rows.length; i++) {
                         if (Math.abs(i - slotIndex) <= 3) {
                             if (slotAssigned[i]) {
-                                slotAssigned[i].forEach(p => {
-                                    forbiddenPersons.push(p);
-                                });
+                                slotAssigned[i].forEach(p => forbiddenPersons.push(p));
                             }
                         }
                     }
-
-                    if (currentVal) {
-                        forbiddenPersons = forbiddenPersons.filter(p => p !== currentVal);
-                    }
+                    if (currentVal) forbiddenPersons = forbiddenPersons.filter(p => p !== currentVal);
 
                     let options = `<option value="">-- 請選擇人員 --</option>`;
                     baseList.forEach(name => {
@@ -432,7 +403,6 @@
                     select.innerHTML = options;
                 });
             });
-
             updateVehicleDropdowns();
         }
 
@@ -447,10 +417,7 @@
                 let currentVal = select.value;
                 let type = select.getAttribute('data-type');
                 let baseList = allSoldiers;
-
-                if (type === 'vehicle-commander') {
-                    baseList = driverCommanderList; // 車長套用專屬清單
-                }
+                if (type === 'vehicle-commander') baseList = driverCommanderList;
 
                 let options = `<option value="">-- 請選擇人員 --</option>`;
                 baseList.forEach(name => {
@@ -466,118 +433,50 @@
         function switchPage(pageNum) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-
             document.querySelectorAll('.tab-btn')[pageNum - 1].classList.add('active');
             document.getElementById(`page-${pageNum}`).classList.add('active');
         }
 
-        function getAssignedGuards() {
-            const guardSelects = document.querySelectorAll('.guard-select');
-            let assigned = [];
-            guardSelects.forEach(select => {
-                if (select.value) assigned.push(select.value);
+        // 核心功能 1：將表格區塊轉為圖片下載
+        function exportTableToImage() {
+            const captureElement = document.getElementById('capture-area');
+
+            // 暫時把 select 內容轉成文字以便截圖清楚顯示
+            html2canvas(captureElement, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = '營區排班表.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
             });
-            return Array.from(new Set(assigned));
         }
 
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
+        // 核心功能 2：啟動 LINE 分享
+        function shareToLine() {
+            const captureElement = document.getElementById('capture-area');
 
-        function previewDuties() {
-            const warningMsg = document.getElementById("warning-msg");
-            warningMsg.innerText = "";
+            html2canvas(captureElement, { scale: 2 }).then(canvas => {
+                canvas.toBlob(blob => {
+                    const file = new File([blob], "duty-table.png", { type: "image/png" });
 
-            let assignedGuards = [];
-            let guardDetails = {};
-            const guardSelects = document.querySelectorAll('.guard-select');
+                    // 如果手機或瀏覽器支援原生分享（可直接帶入圖片檔案到 LINE）
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            title: '營區排班表',
+                            text: '📅 每日固定崗位與車輛排班表出爐囉！',
+                            files: [file]
+                        }).catch(error => console.log('分享取消', error));
+                    } else {
+                        // 備用方案：如果不支援直接分享檔案，先下載圖片並開啟 LINE 分享連結
+                        const link = document.createElement('a');
+                        link.download = '營區排班表.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
 
-            for (let select of guardSelects) {
-                let postName = select.getAttribute('data-post');
-                let person = select.value;
-                if (person) {
-                    if (assignedGuards.includes(person)) {
-                        warningMsg.innerText = `⚠️ 警告：人員 "${person}" 被重複指派到多個崗位！`;
-                        return;
+                        alert('已自動下載排班圖片！即將為您開啟 LINE，請在聊天室中直接上傳剛剛下載的圖片即可。');
+                        window.open('https://line.me/R/msg/text/?' + encodeURIComponent('📅 每日固定崗位與車輛排班表已產生，請檢視圖片！'), '_blank');
                     }
-                    assignedGuards.push(person);
-                    guardDetails[postName] = person;
-                }
-            }
-
-            let resultsHTML = `<h2>📋 排班與打掃預覽結果</h2>`;
-            resultsHTML += `<div class="section-box"><h3>🛡️ 固定崗位/哨別分派</h3><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 13px;">`;
-            if (Object.keys(guardDetails).length === 0) {
-                resultsHTML += `<div style="color: #7f8c8d; grid-column: span 3;">（目前尚未選擇任何排哨人員）</div>`;
-            } else {
-                for (const [post, person] of Object.entries(guardDetails)) {
-                    resultsHTML += `<div>• <strong>${post}</strong>：${person}</div>`;
-                }
-            }
-            resultsHTML += `</div></div>`;
-
-            document.getElementById("results").innerHTML = resultsHTML;
-        }
-
-        function exportToPDF() {
-            previewDuties();
-            window.print();
-        }
-
-        function generateRandomCleaning() {
-            const assignedGuards = getAssignedGuards();
-            let availableCleaners = targetCleaningSoldiers.filter(name => !assignedGuards.includes(name));
-
-            shuffle(availableCleaners);
-
-            let totalNeeded = 6 + 22;
-            let resultsHTML = `<h2>🧹 亂數打掃抽籤結果</h2>`;
-
-            if (availableCleaners.length < totalNeeded) {
-                resultsHTML += `<div class="warning">⚠️ 注意：可打掃人數（${availableCleaners.length}人）小於總需求（${totalNeeded}人），部分區域可能無法補滿。</div>`;
-            }
-
-            let startIndex = 0;
-
-            resultsHTML += `<h3>☀️ 早上打掃任務</h3>`;
-            for (const [area, count] of Object.entries(morningDuties)) {
-                let group = [];
-                if (startIndex < availableCleaners.length) {
-                    let end = Math.min(startIndex + count, availableCleaners.length);
-                    group = availableCleaners.slice(startIndex, end);
-                    startIndex = end;
-                }
-                resultsHTML += `
-                <div class="result-card">
-                    <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
-                    <p>${group.length > 0 ? group.join('、') : '<span style="color:#e74c3c;">人數不足</span>'}</p>
-                </div>
-            `;
-            }
-
-            resultsHTML += `<h3>🌤️ 下午打掃任務</h3>`;
-            for (const [area, count] of Object.entries(afternoonDuties)) {
-                let group = [];
-                if (startIndex < availableCleaners.length) {
-                    let end = Math.min(startIndex + count, availableCleaners.length);
-                    group = availableCleaners.slice(startIndex, end);
-                    startIndex = end;
-                }
-                resultsHTML += `
-                <div class="result-card">
-                    <h4>📌 ${area} <span style="font-size: 12px; color: #7f8c8d;">(${count}人)</span></h4>
-                    <p>${group.length > 0 ? group.join('、') : '<span style="color:#e74c3c;">人數不足</span>'}</p>
-                </div>
-            `;
-            }
-
-            document.getElementById("cleaning-results").innerHTML = resultsHTML;
+                });
+            });
         }
 
         window.onload = initDropdowns;
