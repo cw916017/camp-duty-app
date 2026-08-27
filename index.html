@@ -34,6 +34,17 @@
         h1 {
             font-size: 20px;
             margin-top: 0;
+            margin-bottom: 4px;
+        }
+
+        /* 浮水印／出品字眼樣式 */
+        .watermark-banner {
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 500;
         }
 
         h2 {
@@ -239,6 +250,7 @@
 
     <div class="container">
         <h1>🪖 營區排哨與打掃分配系統</h1>
+        <div class="watermark-banner">✨ 元泰出品 · 版權所有 ✨</div>
 
         <!-- 分頁按鈕 -->
         <div class="tab-buttons">
@@ -402,7 +414,6 @@
             "邵昱晟", "顏郁凱", "魏子琁", "黃昱豪"
         ];
 
-        // 移除了 extraAnSoldiers，全面只使用 28 位基本人員
         const allSoldiers = Array.from(new Set([...baseSoldiers]));
 
         const patrolList = ["余星宗", "林隆宏", "許書銘", "盧精汶", "廖春祿", "吳炳憲", "許文豪", "歐家榮", "蘇俊憲"];
@@ -419,16 +430,15 @@
         const specialVehicleCommanders = ["林隆宏", "余星宗", "許書銘"];
         const driverCommanderList = Array.from(new Set([...commanderList, ...specialVehicleCommanders]));
 
-        // 預設打掃區域與人數
+        // 打掃區域與預設人數 (皆為 1 人)
         const defaultCleaningDuties = {
-            "升旗": 3,
-            "冰桶": 3,
-            "下寢浴廁含洗手台": 4,
-            "上寢浴廁含洗手台": 4,
-            "下寢垃圾": 3,
-            "上寢垃圾": 3,
-            "冰桶、降旗": 3,
-            "下寢寢室收餐勤": 5
+            "冰桶、降旗": 1,
+            "下寢浴廁含洗手台": 1,
+            "上寢浴廁含洗手台": 1,
+            "下寢垃圾": 1,
+            "上寢垃圾": 1,
+            "下寢寢室": 1,
+            "收餐勤": 1
         };
 
         function initApp() {
@@ -509,13 +519,13 @@
             });
         }
 
-        // 初始化打掃按鈕選取池
+        // 初始化打掃按鈕選取池（預設取消全選）
         function initCleaningBallPool() {
             const poolContainer = document.getElementById('soldier-ball-pool');
             poolContainer.innerHTML = '';
             allSoldiers.forEach(name => {
                 const ball = document.createElement('div');
-                ball.className = 'soldier-ball selected'; // 預設全選
+                ball.className = 'soldier-ball';
                 ball.innerText = name;
                 ball.setAttribute('data-name', name);
                 ball.onclick = () => {
