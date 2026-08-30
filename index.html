@@ -162,6 +162,14 @@
             background-color: #219653;
         }
 
+        button.line-btn {
+            background-color: #06c755;
+        }
+
+        button.line-btn:hover {
+            background-color: #05b34c;
+        }
+
         /* 人員方塊按鈕網格 */
         .ball-pool-container {
             display: grid;
@@ -448,6 +456,9 @@
             "收餐勤": 1
         };
 
+        // 儲存最新的抽籤結果供複製使用
+        let latestCleaningResults = {};
+
         function initApp() {
             initGuardDropdowns();
             initCleaningBallPool();
@@ -624,17 +635,21 @@
             }
 
             let shuffled = [...availablePool].sort(() => Math.random() - 0.5);
-            let results = {};
+            latestCleaningResults = {};
             let currentIndex = 0;
 
             for (const [duty, count] of Object.entries(dutiesConfig)) {
-                results[duty] = shuffled.slice(currentIndex, currentIndex + count);
+                latestCleaningResults[duty] = shuffled.slice(currentIndex, currentIndex + count);
                 currentIndex += count;
             }
 
+            renderCleaningResults();
+        }
+
+        function renderCleaningResults() {
             const resultsDiv = document.getElementById('cleaning-results');
             let html = `<h2>🧹 今日打掃抽籤分配結果</h2>`;
-            for (const [duty, assignedList] of Object.entries(results)) {
+            for (const [duty, assignedList] of Object.entries(latestCleaningResults)) {
                 html += `
                     <div class="result-card">
                         <h4>${duty} (${assignedList.length}人)</h4>
@@ -642,7 +657,40 @@
                     </div>
                 `;
             }
+
+            // 新增 LINE 相關動作按鈕
+            html += `
+                <button class="action-btn line-btn" onclick="copyLineCleaningText()">📋 複製 LINE 格式文字</button>
+                <button class="action-btn line-btn" onclick="shareLineCleaningText()" style="background-color: #00b900;">📲 發送到 LINE</button>
+            `;
+
             resultsDiv.innerHTML = html;
+        }
+
+        // 產生指定的 LINE 文字格式
+        function formatLineText() {
+            let text = "🧹 【今日打掃分配】\n";
+            for (const [duty, assignedList] of Object.entries(latestCleaningResults)) {
+                text += `${duty}: ${assignedList.join('、')}\n`;
+            }
+            return text.trim();
+        }
+
+        // 複製文字到剪貼簿
+        function copyLineCleaningText() {
+            const text = formatLineText();
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已成功複製 LINE 格式文字！可以直接貼上。');
+            }).catch(err => {
+                alert('複製失敗，請手動複製。');
+            });
+        }
+
+        // 直接調用 LINE 分享
+        function shareLineCleaningText() {
+            const text = formatLineText();
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+            window.open(lineUrl, '_blank');
         }
 
         window.onload = initApp;
